@@ -122,7 +122,7 @@ public:
      *
      *  @param change_callback See EmbAJAXPage::handleRequest() for details.
      */
-    virtual void installPage(EmbAJAXPageBase *page, const char *path, void (*change_callback)()=0) = 0;
+    virtual void installPage(EmbAJAXPageBase *page, const char *path, void (*change_callback)()=0, void (*onConnect_callback)()=0, void (*onDisconnect_callback)()=0, void (*onMessage_callback)()=0) = 0;
     /** Insert this hook into loop(). Takes care of the appropriate server calls, if needed. */
     virtual void loopHook() = 0;
 

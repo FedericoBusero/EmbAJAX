@@ -58,9 +58,15 @@ public:
         _server->arg(name).toCharArray (buf, buflen);
         return buf;
     }
-    void installPage(EmbAJAXPageBase *page, const char *path, void (*change_callback)()=0) override {
+    void installPage(EmbAJAXPageBase *page, const char *path, void (*change_callback)()=0, void (*onConnect_callback)()=0, void (*onDisconnect_callback)()=0, void (*onMessage_callback)()=0) override {
         _server->on(path, [=]() {
-             if (_server->method() == HTTP_POST) {  // AJAX request
+             if (_server->method() == HTTP_POST) {  // AJAX request                 
+                 if (onMessage_callback) (*onMessage_callback)();
+                 if (!connected) {
+                     connected=true;
+                     if (onConnect_callback) (*onConnect_callback)();
+                 }
+                 lastmessagetime=millis();
                  page->handleRequest(change_callback);
              } else {  // Page load
                  page->printPage();
@@ -69,9 +75,24 @@ public:
     }
     void loopHook() override {
         _server->handleClient();
+        
+        boolean lastconnected = connected;
+        if (millis()>lastmessagetime+2500UL) {
+			connected=false;
+        }
+        if (lastconnected && !connected) {
+			if (_onDisconnect_callback) (*_onDisconnect_callback)();
+        }
     };
+	
+    boolean getConnected() { return connected; }
+	
 private:
     EmbAJAXOutputDriverWebServerClass *_server;
+    
+    boolean connected=false;
+	unsigned long lastmessagetime=0;
+	void (*_onDisconnect_callback)()=0;
 };
 
 typedef EmbAJAXOutputDriverGeneric EmbAJAXOutputDriver;

@@ -240,13 +240,17 @@ EmbAJAXSlider::EmbAJAXSlider(const char* id, int16_t min, int16_t max, int16_t i
 }
 
 void EmbAJAXSlider::print() const {
+    int oninput_timeout = 100;
+    char buf[12];
+
     _driver->printContent("<input type=\"range\"");
     _driver->printAttribute("id", _id);
     _driver->printAttribute("min", _min);
     _driver->printAttribute("max", _max);
     _driver->printAttribute("value", _value);
-    _driver->printContent(" onChange=\"doRequest(this.id, this.value);\"/>");
-}
+    _driver->printContent(" onInput=\"doRequestInterval(this.id, this.value,");
+	_driver->printContent(itoa(oninput_timeout, buf, 10));
+	_driver->printContent(",this);\"  onChange=\"doRequestInterval(this.id, this.value,0,this);\"/>");}
 
 const char* EmbAJAXSlider::value(uint8_t which) const {
     if (which == EmbAJAXBase::Value) return itoa(_value, itoa_buf, 10);
@@ -522,10 +526,11 @@ void EmbAJAXOptionSelectBase::updateFromDriverArg(const char* argname) {
 
 void EmbAJAXBase::printPage(EmbAJAXBase** _children, size_t NUM, const char* _title, const char* _header_add) const {
     _driver->printHeader(true);
-    _driver->printContent("<!DOCTYPE html>\n<HTML><HEAD><TITLE>");
+    _driver->printContent("<!DOCTYPE html>\n<HTML><HEAD><meta name='viewport' content='width=device-width, initial-scale=1.0, user-scalable=no' /><TITLE>");
     if (_title) _driver->printContent(_title);
     _driver->printContent("</TITLE>\n<SCRIPT>\n");
     _driver->printContent("var serverrevision = 0;\n"
+                            "var num_queue = 0;\n"			  
                             "function doRequest(id='', value='') {\n"
                             "    var req = new XMLHttpRequest();\n"
                             "    req.timeout = 10000;\n"   // probably disconnected. Don't stack up request objects forever.
@@ -534,15 +539,38 @@ void EmbAJAXBase::printPage(EmbAJAXBase** _children, size_t NUM, const char* _ti
                             "       doUpdates(JSON.parse(req.responseText));\n"
                             "       if(window.ardujaxsh) window.ardujaxsh.in();\n"
                             "    }\n"
+                            "    req.onloadend = function() { --num_queue; }\n"
                             "    if(id) {\n"  // if we fail to transmit a UI change to the server, for whatever reason, we will be out of sync
                             "       req.onerror = req.ontimeout = function() {\n"
                             "          serverrevision = 0;\n" // this will cause the server to re-send _all_ element states on the next poll()
                             "       }\n"
                             "    }\n"
+                            "    ++num_queue;\n"                    
                             "    req.open('POST', document.URL, true);\n"
                             "    req.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');\n"
                             "    req.send('id=' + id + '&value=' + encodeURIComponent(value) + '&revision=' + serverrevision);\n"
                             "}\n");
+    
+    _driver->printContent(  "function doRequestInterval(id,value,min_time_transmit,elem) {\n"
+                            "   var now = new Date().getTime();\n"
+                            "   if (elem.sendTimeout) {\n"
+                            "     clearTimeout(elem.sendTimeout);\n"
+                            "     elem.sendTimeout = null;\n"
+                            "   }\n"
+                            "   if((elem.lastSend === undefined || now - elem.lastSend >= min_time_transmit) && (num_queue===0)) {\n"
+                            "     doRequest(id,value);\n"
+                            "     elem.lastSend = new Date().getTime();\n"
+                            "     return;\n"
+                            "   } else {\n"
+                            "      elem.lastId = id;\n"
+                            "      elem.lastValue = value;\n"
+                            "      elem.sendTimeout = setTimeout(function send_waittransmit() {\n"
+                            "         elem.sendTimeout = null;\n"
+                            "         doRequestInterval(elem.lastId,elem.lastValue, min_time_transmit,elem);\n"
+                            "      }, min_time_transmit - (now - elem.lastSend));\n"
+                            "   }\n"
+                            "}\n");
+
     _driver->printContent("function doUpdates(response) {\n"
                             "    serverrevision = response.revision;\n"
                             "    var updates = response.updates;\n"
@@ -560,7 +588,11 @@ void EmbAJAXBase::printPage(EmbAJAXBase** _children, size_t NUM, const char* _ti
                             "    }\n"
                             "}\n");
     _driver->printContent("function doPoll() {\n"
-                            "    doRequest();\n"  // poll == request without id
+                            "    if (num_queue ===0) {\n"  
+                            "      doRequest();\n"  // poll == request without id
+                            "    } else {\n"  
+                            "      if(window.ardujaxsh) window.ardujaxsh.out();\n" // add to misses
+                            "    }" 
                             "}\n"
                             "setInterval(doPoll,1000);\n");
     _driver->printContent("</SCRIPT>\n");
