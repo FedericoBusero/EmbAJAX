@@ -58,14 +58,14 @@ public:
         _server->arg(name).toCharArray (buf, buflen);
         return buf;
     }
-    void installPage(EmbAJAXPageBase *page, const char *path, void (*change_callback)()=0, void (*onConnect_callback)()=0, void (*onDisconnect_callback)()=0, void (*onMessage_callback)()=0) override {
-        _onDisconnect_callback = onDisconnect_callback;	    
+    void installPage(EmbAJAXPageBase *page, const char *path, void (*change_callback)()=0, void (*onConnectionEvent_callback)(EmbAjaxConnectionEventType)=0) override {
+		_onConnectionEvent_callback = onConnectionEvent_callback;
         _server->on(path, [=]() {
              if (_server->method() == HTTP_POST) {  // AJAX request                 
-                 if (onMessage_callback) (*onMessage_callback)();
+				 if (onConnectionEvent_callback) (*onConnectionEvent_callback)(EMBAJAX_CONNECTIONEVENT_MESSAGE);
                  if (!connected) {
                      connected=true;
-                     if (onConnect_callback) (*onConnect_callback)();
+                     if (_onConnectionEvent_callback) (*_onConnectionEvent_callback)(EMBAJAX_CONNECTIONEVENT_CONNECTED);
                  }
                  lastmessagetime=millis();
                  page->handleRequest(change_callback);
@@ -82,7 +82,7 @@ public:
 			connected=false;
         }
         if (lastconnected && !connected) {
-			if (_onDisconnect_callback) (*_onDisconnect_callback)();
+			if (_onConnectionEvent_callback) (*_onConnectionEvent_callback)(EMBAJAX_CONNECTIONEVENT_DISCONNECTED);
         }
     };
 	
@@ -92,8 +92,8 @@ private:
     EmbAJAXOutputDriverWebServerClass *_server;
     
     boolean connected=false;
-	unsigned long lastmessagetime=0;
-	void (*_onDisconnect_callback)()=0;
+    unsigned long lastmessagetime=0;
+    void (*_onConnectionEvent_callback)(EmbAjaxConnectionEventType)=0;
 };
 
 typedef EmbAJAXOutputDriverGeneric EmbAJAXOutputDriver;
