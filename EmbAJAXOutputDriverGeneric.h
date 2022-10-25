@@ -59,6 +59,7 @@ public:
         return buf;
     }
     void installPage(EmbAJAXPageBase *page, const char *path, void (*change_callback)()=0, void (*onConnect_callback)()=0, void (*onDisconnect_callback)()=0, void (*onMessage_callback)()=0) override {
+        _onDisconnect_callback = onDisconnect_callback;	    
         _server->on(path, [=]() {
              if (_server->method() == HTTP_POST) {  // AJAX request                 
                  if (onMessage_callback) (*onMessage_callback)();
