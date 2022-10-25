@@ -56,7 +56,7 @@ public:
         _request->arg(name).toCharArray (buf, buflen);
         return buf;
     }
-    void installPage(EmbAJAXPageBase *page, const char *path, void (*change_callback)()=0, void (*onConnect_callback)()=0, void (*onDisconnect_callback)()=0, void (*onMessage_callback)()=0) override {
+    void installPage(EmbAJAXPageBase *page, const char *path, void (*change_callback)()=0, void (*onConnectionEvent_callback)(EmbAjaxConnectionEventType)=0) override {
         _server->on(path, [=](AsyncWebServerRequest* request) {
              _request = request;
              _response = 0;
