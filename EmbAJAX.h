@@ -30,6 +30,12 @@ class EmbAJAXElement;
 class EmbAJAXContainerBase;
 class EmbAJAXPageBase;
 
+typedef enum  {
+EMBAJAX_CONNECTIONEVENT_CONNECTED,
+EMBAJAX_CONNECTIONEVENT_DISCONNECTED,
+EMBAJAX_CONNECTIONEVENT_MESSAGE,
+} EmbAjaxConnectionEventType;
+
 /** @brief Abstract base class for anything shown on an EmbAJAXPage
  *
  *  Anything that can be displayed on an EmbAJAXPage will have to inherit from this class
@@ -122,7 +128,7 @@ public:
      *
      *  @param change_callback See EmbAJAXPage::handleRequest() for details.
      */
-    virtual void installPage(EmbAJAXPageBase *page, const char *path, void (*change_callback)()=0, void (*onConnect_callback)()=0, void (*onDisconnect_callback)()=0, void (*onMessage_callback)()=0) = 0;
+    virtual void installPage(EmbAJAXPageBase *page, const char *path, void (*change_callback)()=0, void (*onConnectionEvent_callback)(EmbAjaxConnectionEventType)=0) = 0;
     /** Insert this hook into loop(). Takes care of the appropriate server calls, if needed. */
     virtual void loopHook() = 0;
 
