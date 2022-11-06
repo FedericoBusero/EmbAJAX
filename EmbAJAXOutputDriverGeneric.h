@@ -62,10 +62,10 @@ public:
 		_onConnectionEvent_callback = onConnectionEvent_callback;
         _server->on(path, [=]() {
              if (_server->method() == HTTP_POST) {  // AJAX request                 
-				 if (onConnectionEvent_callback) (*onConnectionEvent_callback)(EMBAJAX_CONNECTIONEVENT_MESSAGE);
+                 if (onConnectionEvent_callback) (*onConnectionEvent_callback)(EmbAjaxConnectionEventMessage);
                  if (!connected) {
                      connected=true;
-                     if (_onConnectionEvent_callback) (*_onConnectionEvent_callback)(EMBAJAX_CONNECTIONEVENT_CONNECTED);
+                     if (_onConnectionEvent_callback) (*_onConnectionEvent_callback)(EmbAjaxConnectionEventConnected);
                  }
                  lastmessagetime=millis();
                  page->handleRequest(change_callback);
@@ -79,10 +79,10 @@ public:
         
         boolean lastconnected = connected;
         if (millis()>lastmessagetime+2500UL) {
-			connected=false;
+		connected=false;
         }
         if (lastconnected && !connected) {
-			if (_onConnectionEvent_callback) (*_onConnectionEvent_callback)(EMBAJAX_CONNECTIONEVENT_DISCONNECTED);
+		if (_onConnectionEvent_callback) (*_onConnectionEvent_callback)(EmbAjaxConnectionEventDisconnected);
         }
     };
 	
