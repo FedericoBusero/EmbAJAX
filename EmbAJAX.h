@@ -30,12 +30,6 @@ class EmbAJAXElement;
 class EmbAJAXContainerBase;
 class EmbAJAXPageBase;
 
-typedef enum  {
-EMBAJAX_CONNECTIONEVENT_CONNECTED,
-EMBAJAX_CONNECTIONEVENT_DISCONNECTED,
-EMBAJAX_CONNECTIONEVENT_MESSAGE,
-} EmbAjaxConnectionEventType;
-
 /** @brief Abstract base class for anything shown on an EmbAJAXPage
  *
  *  Anything that can be displayed on an EmbAJAXPage will have to inherit from this class
@@ -102,6 +96,13 @@ template<size_t NUM> friend class EmbAJAXContainer;
     void printPage(EmbAJAXBase** children, size_t num, const char* _title, const char* _header) const;
     /** Filthy trick to keep (template) implementation out of the header. See EmbAJAXPage::handleRequest() */
     void handleRequest(EmbAJAXBase** children, size_t num, void (*change_callback)());
+};
+
+/** Connection event type. Used in callback function onConnectionEvent_callback in installPage */
+enum  EmbAjaxConnectionEventType {
+	EmbAjaxConnectionEventConnected,
+	EmbAjaxConnectionEventDisconnected,
+	EmbAjaxConnectionEventMessage,
 };
 
 /** @brief Abstract base class for output drivers/server implementations
