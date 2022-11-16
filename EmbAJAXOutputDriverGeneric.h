@@ -62,11 +62,11 @@ public:
 		_onConnectionEvent_callback = onConnectionEvent_callback;
         _server->on(path, [=]() {
              if (_server->method() == HTTP_POST) {  // AJAX request                 
-                 if (onConnectionEvent_callback) (*onConnectionEvent_callback)(EmbAjaxConnectionEventMessage);
                  if (!connected) {
                      connected=true;
                      if (_onConnectionEvent_callback) (*_onConnectionEvent_callback)(EmbAjaxConnectionEventConnected);
                  }
+                 if (onConnectionEvent_callback) (*onConnectionEvent_callback)(EmbAjaxConnectionEventMessage);
                  lastmessagetime=millis();
                  page->handleRequest(change_callback);
              } else {  // Page load
