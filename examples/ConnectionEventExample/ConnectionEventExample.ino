@@ -1,12 +1,13 @@
 /* Basic usage example for EmbAJAX library:
-   Provide a web interface to set built-in LED on, off, or blinking.
+   Provide a web interface with a slider. The example shows the use of connection events, to display the connection state using a LED.
+   The LED is blinking when waiting for a connection. When there is connection the LED is switched off and flashes each time something is received
 
    Note that ESP boards seems to be no real standard on which pin the builtin LED is on, and
    there is a very real chance that LED_BUILTIN is not defined, correctly, for your board.
    If you see no blinking, try changing the LEDPIN define (with an externally connected LED
    on a known pin being the safest option). Similarly, on and off states are sometimes reversed.
 
-   This example code is in the public domain (CONTRARY TO THE LIBRARY ITSELF). */
+   This example code is in the public domain. */
 
 #include <EmbAJAX.h>
 
@@ -32,38 +33,46 @@ MAKE_EmbAJAXPage(page, "EmbAJAX example - Connection events", "",
                 )
 
 void setup() {
+  Serial.begin(115200);
+  
   // Example WIFI setup as an access point. Change this to whatever suits you, best.
   WiFi.mode(WIFI_AP);
   WiFi.softAPConfig (IPAddress (192, 168, 4, 1), IPAddress (0, 0, 0, 0), IPAddress (255, 255, 255, 0));
   WiFi.softAP("EmbAJAXTest", "12345678");
+
+  Serial.println("EmbAjax connection example");
 
   // Tell the server to serve our EmbAJAX test page on root
   // installPage() abstracts over the (trivial but not uniform) WebServer-specific instructions to do so
   driver.installPage(&page, "/", updateUI, onConnectionEvent);
   server.begin();
 
-  // pinMode(LEDPIN, OUTPUT);
-
   pinMode(LEDCONNECTIONPIN, OUTPUT);
-  
+
   last_activity_message = millis();
 }
 
 void updateUI() {
   // Here you can add code to handle the slider events
+
+  Serial.print("updateUI slider value=");
+  Serial.println(slider.intValue());
 }
 
 void onConnectionEvent(EmbAjaxConnectionEventType event) {
   switch (event)
   {
     case EmbAjaxConnectionEventConnected:
+      Serial.println("Connected");
       digitalWrite(LEDCONNECTIONPIN, LED_BRIGHTNESS_OFF);
       break;
 
     case EmbAjaxConnectionEventDisconnected:
+      Serial.println("Disconnected");
       break;
 
     case EmbAjaxConnectionEventMessage:
+      Serial.println("Message received");
       digitalWrite(LEDCONNECTIONPIN, LED_BRIGHTNESS_ON);
       last_activity_message = millis();
       break;
@@ -75,6 +84,7 @@ void onConnectionEvent(EmbAjaxConnectionEventType event) {
 
 
 void loop() {
+  // when something is received, the LED will be switched on in onConnectionEvent, here it is turned off after 1 ms
   if (millis() > last_activity_message + 1)
   {
     digitalWrite(LEDCONNECTIONPIN, LED_BRIGHTNESS_OFF);
@@ -83,6 +93,7 @@ void loop() {
   // handle network. loopHook() simply calls server.handleClient(), in most but not all server implementations.
   driver.loopHook();
 
+  // In case there is no connection, let the LED blink
   if (!driver.getConnected()) {
     digitalWrite(LEDCONNECTIONPIN, (millis() % 1000) > 500 ? LED_BRIGHTNESS_ON : LED_BRIGHTNESS_OFF);
   }
