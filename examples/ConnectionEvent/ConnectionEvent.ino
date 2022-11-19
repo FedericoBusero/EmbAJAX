@@ -84,18 +84,18 @@ void onConnectionEvent(EmbAjaxConnectionEventType event) {
 
 
 void loop() {
-  // when something is received, the LED will be switched on in onConnectionEvent, here it is turned off after 1 ms
-  if (millis() > last_activity_message + 1)
-  {
-    digitalWrite(LEDCONNECTIONPIN, LED_BRIGHTNESS_OFF);
-  }
-
   // handle network. loopHook() simply calls server.handleClient(), in most but not all server implementations.
   driver.loopHook();
 
-  // In case there is no connection, let the LED blink
-  if (!driver.getConnected()) {
+  if (driver.getConnected()) {
+    // when something is received, the LED will be switched on in onConnectionEvent, here it is turned off after 1 ms
+    if (millis() > last_activity_message + 1)
+    {
+      digitalWrite(LEDCONNECTIONPIN, LED_BRIGHTNESS_OFF);
+    }
+  }
+  else {
+    // In case there is no connection, let the LED blink
     digitalWrite(LEDCONNECTIONPIN, (millis() % 1000) > 500 ? LED_BRIGHTNESS_ON : LED_BRIGHTNESS_OFF);
   }
-
 }
