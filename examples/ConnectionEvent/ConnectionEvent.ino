@@ -1,6 +1,7 @@
 /* Basic usage example for EmbAJAX library:
-   Provide a web interface with a slider. The example shows the use of connection events, to display the connection state using a LED.
-   The LED is blinking when waiting for a connection. When there is connection the LED is switched off and flashes each time something is received
+   The example shows the use of connection events, to display the connection state using a LED.
+   The LED is blinking when waiting for a connection. When there is connection the LED is switched 
+   off and flashes each time something is received. The web interface only has a slider. 
 
    Note that ESP boards seems to be no real standard on which pin the builtin LED is on, and
    there is a very real chance that LED_BUILTIN is not defined, correctly, for your board.
