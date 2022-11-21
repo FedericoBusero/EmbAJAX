@@ -85,7 +85,7 @@ void onConnectionEvent(EmbAjaxConnectionEventType event) {
 
 
 void loop() {
-  // handle network. loopHook() simply calls server.handleClient(), in most but not all server implementations.
+  // handle network. loopHook() simply calls server.handleClient(), it can also call the connection callback function, here onConnectionEvent.
   driver.loopHook();
 
   if (driver.getConnected()) {
