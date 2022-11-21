@@ -1,5 +1,5 @@
 /* Basic usage example for EmbAJAX library:
-   The example shows the use of connection events, to display the connection state using a LED.
+   The example shows the use of connection events, the LED shows the connection state.
    The LED is blinking when waiting for a connection. When there is connection the LED is switched 
    off and flashes each time something is received. The web interface only has a slider. 
 
