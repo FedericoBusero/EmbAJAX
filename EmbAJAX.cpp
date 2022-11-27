@@ -233,7 +233,7 @@ void EmbAJAXMutableSpan::setValue(const char* value, bool allowHTML) {
 
 //////////////////////// EmbAJAXSlider /////////////////////////////
 
-EmbAJAXSlider::EmbAJAXSlider(const char* id, int16_t min, int16_t max, int16_t initial, int update_min_interval_ms) : EmbAJAXElement(id) {
+EmbAJAXSlider::EmbAJAXSlider(const char* id, int16_t min, int16_t max, int16_t initial, int16_t update_min_interval_ms) : EmbAJAXElement(id) {
     _value = initial;
     _min = min;
     _max = max;
@@ -281,7 +281,7 @@ void EmbAJAXSlider::setValue(int16_t value) {
 
 //////////////////////// EmbAJAXColorPicker /////////////////////////
 
-EmbAJAXColorPicker::EmbAJAXColorPicker(const char* id, uint8_t r, uint8_t g, uint8_t b, int update_min_interval_ms) : EmbAJAXElement(id) {
+EmbAJAXColorPicker::EmbAJAXColorPicker(const char* id, uint8_t r, uint8_t g, uint8_t b, int16_t update_min_interval_ms) : EmbAJAXElement(id) {
     _r = r;
     _g = g;
     _b = b;
