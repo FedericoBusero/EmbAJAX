@@ -233,14 +233,14 @@ void EmbAJAXMutableSpan::setValue(const char* value, bool allowHTML) {
 
 //////////////////////// EmbAJAXSlider /////////////////////////////
 
-EmbAJAXSlider::EmbAJAXSlider(const char* id, int16_t min, int16_t max, int16_t initial) : EmbAJAXElement(id) {
+EmbAJAXSlider::EmbAJAXSlider(const char* id, int16_t min, int16_t max, int16_t initial, int update_min_interval_ms) : EmbAJAXElement(id) {
     _value = initial;
     _min = min;
     _max = max;
+    _update_min_interval_ms = update_min_interval_ms;
 }
 
 void EmbAJAXSlider::print() const {
-    int oninput_timeout = 100;
     char buf[12];
 
     _driver->printContent("<input type=\"range\"");
@@ -248,9 +248,15 @@ void EmbAJAXSlider::print() const {
     _driver->printAttribute("min", _min);
     _driver->printAttribute("max", _max);
     _driver->printAttribute("value", _value);
-    _driver->printContent(" onInput=\"doRequestInterval(this.id, this.value,");
-	_driver->printContent(itoa(oninput_timeout, buf, 10));
-	_driver->printContent(",this);\"  onChange=\"doRequestInterval(this.id, this.value,0,this);\"/>");}
+    if (_update_min_interval_ms > 0 ) {
+        _driver->printContent(" onInput=\"doRequestInterval(this.id, this.value,");
+        _driver->printContent(itoa(_update_min_interval_ms, buf, 10));
+        _driver->printContent(",this);\"  onChange=\"doRequestInterval(this.id, this.value,0,this);\"/>");
+    }
+    else {
+        _driver->printContent(" onChange=\"doRequest(this.id, this.value);\"/>");
+    }
+}
 
 const char* EmbAJAXSlider::value(uint8_t which) const {
     if (which == EmbAJAXBase::Value) return itoa(_value, itoa_buf, 10);
@@ -275,18 +281,29 @@ void EmbAJAXSlider::setValue(int16_t value) {
 
 //////////////////////// EmbAJAXColorPicker /////////////////////////
 
-EmbAJAXColorPicker::EmbAJAXColorPicker(const char* id, uint8_t r, uint8_t g, uint8_t b) : EmbAJAXElement(id) {
+EmbAJAXColorPicker::EmbAJAXColorPicker(const char* id, uint8_t r, uint8_t g, uint8_t b, int update_min_interval_ms) : EmbAJAXElement(id) {
     _r = r;
     _g = g;
     _b = b;
+    _update_min_interval_ms = update_min_interval_ms;
 }
 
 void EmbAJAXColorPicker::print() const {
+    char buf[12];
+
     _driver->printContent("<input type=\"color\"");
     _driver->printAttribute("id", _id);
     _driver->printAttribute("value", value());
-    // see EmbAJAXTextInput::print(): Use onInput(), instead of onChange().
-    _driver->printContent(" onInput=\"clearTimeout(this.debouncer); this.debouncer=setTimeout(function() {doRequest(this.id, this.value);}.bind(this),1000);\"/>");
+	
+    if (_update_min_interval_ms > 0 ) {
+        _driver->printContent(" onInput=\"doRequestInterval(this.id, this.value,");
+        _driver->printContent(itoa(_update_min_interval_ms, buf, 10));
+        _driver->printContent(",this);\"  onChange=\"doRequestInterval(this.id, this.value,0,this);\"/>");
+    }
+    else {
+        // see EmbAJAXTextInput::print(): Use onInput(), instead of onChange().
+        _driver->printContent(" onInput=\"clearTimeout(this.debouncer); this.debouncer=setTimeout(function() {doRequest(this.id, this.value);}.bind(this),1000);\"/>");
+    }
 }
 
 // helper to make sure we get exactly two hex digits for any input
