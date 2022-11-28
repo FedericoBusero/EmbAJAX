@@ -128,6 +128,8 @@ public:
     /** Set up the given page to be served on the given path.
      *
      *  @param change_callback See EmbAJAXPage::handleRequest() for details.
+     *  @param onConnectionEvent_callback function that will be called when a client is connected,
+     *                                    all clients are disconnected or when a message is received
      */
     virtual void installPage(EmbAJAXPageBase *page, const char *path, void (*change_callback)()=0, void (*onConnectionEvent_callback)(EmbAjaxConnectionEventType)=0) = 0;
     /** Insert this hook into loop(). Takes care of the appropriate server calls, if needed. */
