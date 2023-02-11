@@ -10,7 +10,7 @@
 
    This example code is in the public domain. */
 
-#include "EmbAJAX.h"
+#include <EmbAJAX.h>
 
 #define LEDCONNECTIONPIN LED_BUILTIN
 #define LED_BRIGHTNESS_ON  LOW
