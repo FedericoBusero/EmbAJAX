@@ -98,6 +98,13 @@ template<size_t NUM> friend class EmbAJAXContainer;
     void handleRequest(EmbAJAXBase** children, size_t num, void (*change_callback)());
 };
 
+/** Connection event type. Used in callback function onConnectionEvent_callback in installPage */
+enum  EmbAjaxConnectionEventType {
+	EmbAjaxConnectionEventConnected,
+	EmbAjaxConnectionEventDisconnected,
+	EmbAjaxConnectionEventMessage,
+};
+
 /** @brief Abstract base class for output drivers/server implementations
  *
  *  Output driver as an abstraction over the server read/write commands.
@@ -170,6 +177,8 @@ public:
 private:
     uint16_t _revision;
     uint16_t next_revision;
+protected:
+    void (*_onConnectionEvent_callback)(EmbAjaxConnectionEventType)=0;
 };
 
 /** Convenience macro to set up an EmbAJAXPage, without counting the number of elements for the template. See EmbAJAXPage::EmbAJAXPage()
