@@ -118,7 +118,6 @@ public:
     virtual void printHeader(bool html) = 0;
     virtual void printContent(const char *content) = 0;
     virtual const char* getArg(const char* name, char* buf, int buflen) = 0;
-
     /** Set up the given page to be served on the given path.
      *
      *  @param change_callback See EmbAJAXPage::handleRequest() for details.
