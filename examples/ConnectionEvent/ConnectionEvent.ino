@@ -15,7 +15,7 @@
 #define LEDCONNECTIONPIN LED_BUILTIN
 #define LED_BRIGHTNESS_ON  LOW
 #define LED_BRIGHTNESS_OFF HIGH
-long last_activity_message;
+bool connection_active = false;
 
 // Set up web server, and register it with EmbAJAX. Note: EmbAJAXOutputDriverWebServerClass is a
 // convenience #define to allow using the same example code across platforms
@@ -33,34 +33,12 @@ MAKE_EmbAJAXPage(page, "EmbAJAX example - Connection events", "",
                  &slider
                 )
 
+
 void updateUI() {
   // Here you can add code to handle the slider events
 
   Serial.print("updateUI slider value=");
   Serial.println(slider.intValue());
-}
-
-void onConnectionEvent(EmbAjaxConnectionEventType event) {
-  switch (event)
-  {
-    case EmbAjaxConnectionEventConnected:
-      Serial.println("Connected");
-      digitalWrite(LEDCONNECTIONPIN, LED_BRIGHTNESS_OFF);
-      break;
-
-    case EmbAjaxConnectionEventDisconnected:
-      Serial.println("Disconnected");
-      break;
-
-    case EmbAjaxConnectionEventMessage:
-      Serial.println("Message received");
-      digitalWrite(LEDCONNECTIONPIN, LED_BRIGHTNESS_ON);
-      last_activity_message = millis();
-      break;
-
-    default:
-      break;
-  }
 }
 
 void setup() {
@@ -73,8 +51,6 @@ void setup() {
 
   Serial.println("EmbAjax connection example");
   
-  driver.setConnectionEventCallback(onConnectionEvent);
-
   // Tell the server to serve our EmbAJAX test page on root
   // installPage() abstracts over the (trivial but not uniform) WebServer-specific instructions to do so
   driver.installPage(&page, "/", updateUI);
@@ -82,22 +58,36 @@ void setup() {
 
   pinMode(LEDCONNECTIONPIN, OUTPUT);
 
-  last_activity_message = millis();
+}
+
+void checkConnectionStatus()
+{
+  bool prev_connection_active = connection_active;
+
+  connection_active = page.hasActiveClient(2500);
+  if (connection_active != prev_connection_active)
+  {
+    if (prev_connection_active)
+    {
+      Serial.println("Disconnected");
+    }
+    else
+    {
+      Serial.println("Connected");
+      digitalWrite(LEDCONNECTIONPIN, LED_BRIGHTNESS_OFF);
+    }
+  }
+  if (connection_active) {
+    // when something is received, the LED will be switched on for 15 ms
+    digitalWrite(LEDCONNECTIONPIN, page.hasActiveClient(15) ? LED_BRIGHTNESS_ON : LED_BRIGHTNESS_OFF);
+  }
+  else {
+    digitalWrite(LEDCONNECTIONPIN, (millis() % 1000) > 500 ? LED_BRIGHTNESS_ON : LED_BRIGHTNESS_OFF);
+  }
 }
 
 void loop() {
   // handle network. loopHook() simply calls server.handleClient(), it can also call the connection callback function, here onConnectionEvent.
   driver.loopHook();
-
-  if (driver.getConnected()) {
-    // when something is received, the LED will be switched on in onConnectionEvent, here it is turned off after 1 ms
-    if (millis() > last_activity_message + 1)
-    {
-      digitalWrite(LEDCONNECTIONPIN, LED_BRIGHTNESS_OFF);
-    }
-  }
-  else {
-    // In case there is no connection, let the LED blink
-    digitalWrite(LEDCONNECTIONPIN, (millis() % 1000) > 500 ? LED_BRIGHTNESS_ON : LED_BRIGHTNESS_OFF);
-  }
+  checkConnectionStatus();
 }
