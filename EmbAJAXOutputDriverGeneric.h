@@ -70,9 +70,8 @@ public:
     void loopHook() override {
         _server->handleClient();
     };
-	
 private:
-    EmbAJAXOutputDriverWebServerClass *_server;    
+    EmbAJAXOutputDriverWebServerClass *_server;
 };
 
 typedef EmbAJAXOutputDriverGeneric EmbAJAXOutputDriver;
