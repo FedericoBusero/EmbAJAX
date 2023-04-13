@@ -61,12 +61,6 @@ public:
              _request = request;
              _response = 0;
              if (_request->method() == HTTP_POST) {  // AJAX request
-                 lastmessagetime=millis();
-                 if (!connected) {
-                     connected=true;
-                     if (_onConnectionEvent_callback) (*_onConnectionEvent_callback)(EmbAjaxConnectionEventConnected);
-                 }
-                 if (_onConnectionEvent_callback) (*_onConnectionEvent_callback)(EmbAjaxConnectionEventMessage);
                  page->handleRequest(change_callback);
              } else {  // Page load
                  page->printPage();
@@ -75,25 +69,11 @@ public:
              _request = 0;
         });
     }
-    void loopHook() override {
-        boolean lastconnected = connected;
-        if (millis()>lastmessagetime+2500UL) {
-			connected=false;
-        }
-        if (lastconnected && !connected) {
-			if (_onConnectionEvent_callback) (*_onConnectionEvent_callback)(EmbAjaxConnectionEventDisconnected);
-        }
-    };
-	
-	boolean getConnected() { return connected; }
-    
+    void loopHook() override {};
 private:
     EmbAJAXOutputDriverWebServerClass *_server;
     AsyncWebServerRequest *_request;
     AsyncResponseStream *_response;
-    
-    boolean connected=false;
-    unsigned long lastmessagetime=0;
 };
 
 typedef EmbAJAXOutputDriverESPAsync EmbAJAXOutputDriver;
