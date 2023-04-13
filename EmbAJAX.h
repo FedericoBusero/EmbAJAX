@@ -98,13 +98,6 @@ template<size_t NUM> friend class EmbAJAXContainer;
     void handleRequest(EmbAJAXBase** children, size_t num, void (*change_callback)());
 };
 
-/** Connection event type. Used in callback function onConnectionEvent_callback in installPage */
-enum  EmbAjaxConnectionEventType {
-	EmbAjaxConnectionEventConnected,
-	EmbAjaxConnectionEventDisconnected,
-	EmbAjaxConnectionEventMessage,
-};
-
 /** @brief Abstract base class for output drivers/server implementations
  *
  *  Output driver as an abstraction over the server read/write commands.
@@ -125,16 +118,6 @@ public:
     virtual void printHeader(bool html) = 0;
     virtual void printContent(const char *content) = 0;
     virtual const char* getArg(const char* name, char* buf, int buflen) = 0;
-	
-    /** Set up the callback function to process connection events
-     *
-     *  @param onConnectionEvent_callback function that will be called when a client is connected,
-     *                                    all clients are disconnected or when a message is received
-     */
-    void setConnectionEventCallback(void (*onConnectionEvent_callback)(EmbAjaxConnectionEventType)=0) {
-        _onConnectionEvent_callback = onConnectionEvent_callback;
-    }
-	
     /** Set up the given page to be served on the given path.
      *
      *  @param change_callback See EmbAJAXPage::handleRequest() for details.
@@ -186,8 +169,6 @@ public:
 private:
     uint16_t _revision;
     uint16_t next_revision;
-protected:
-    void (*_onConnectionEvent_callback)(EmbAjaxConnectionEventType)=0;
 };
 
 /** Convenience macro to set up an EmbAJAXPage, without counting the number of elements for the template. See EmbAJAXPage::EmbAJAXPage()
