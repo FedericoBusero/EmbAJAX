@@ -60,7 +60,7 @@ public:
     }
     void installPage(EmbAJAXPageBase *page, const char *path, void (*change_callback)()=0) override {
         _server->on(path, [=]() {
-             if (_server->method() == HTTP_POST) {  // AJAX request                 
+             if (_server->method() == HTTP_POST) {  // AJAX request
                  page->handleRequest(change_callback);
              } else {  // Page load
                  page->printPage();
@@ -72,7 +72,7 @@ public:
     };
 	
 private:
-    EmbAJAXOutputDriverWebServerClass *_server;    
+    EmbAJAXOutputDriverWebServerClass *_server;
 };
 
 typedef EmbAJAXOutputDriverGeneric EmbAJAXOutputDriver;
