@@ -705,26 +705,34 @@ public:
      *                         This way, an update can be sent back to the client, immediately, for a smooth UI experience.
      *                         (Otherwise the client will be updated on the next poll). */
     void handleRequest(void (*change_callback)()=0) override {
+        _latest_ping = millis();
         EmbAJAXBase::handleRequest(EmbAJAXContainer<NUM>::_children, NUM, change_callback);
+    }
+    /** Returns true if a client seems to be connected (connected clients should send a ping at least once per second; by default this
+     *  function returns whether a ping has been seen within the last 5000 ms.
+     *  @param latency_ms Number of milliseconds to consider as maximum silence period for an active connection */
+    bool hasActiveClient(uint64_t latency_ms=5000) const {
+        return(_latest_ping && (_latest_ping + latency_ms > millis()));
     }
 protected:
     const char* _title;
     const char* _header_add;
+    uint64_t _latest_ping = 0;
 };
 
 // If the user has not #includ'ed a specific output driver implementation, make a good guess, here
 #if not defined (EMBAJAX_OUTUPUTDRIVER_IMPLEMENTATION)
 #if defined (ESP8266)
-#include <EmbAJAXOutputDriverESP8266.h>
+#include "EmbAJAXOutputDriverESP8266.h"
 #elif defined (ESP32)
-#include <EmbAJAXOutputDriverESP32.h>
+#include "EmbAJAXOutputDriverESP32.h"
 #elif defined (ARDUINO_ARCH_RP2040)
-#include <EmbAJAXOutputDriverRP2040.h>
+#include "EmbAJAXOutputDriverRP2040.h"
 #else
 #include <WebServer.h>
 #define EmbAJAXOutputDriverWebServerClass WebServer
 #include <WiFi.h>
-#include <EmbAJAXOutputDriverGeneric.h>
+#include "EmbAJAXOutputDriverGeneric.h"
 #warning No output driver available for this hardware (yet). We try using the generic driver, but success is not guaranteed.
 #warning In most cases, implementing a driver is as easy as picking the correct header file to include. Please consider submitting a patch.
 #endif
