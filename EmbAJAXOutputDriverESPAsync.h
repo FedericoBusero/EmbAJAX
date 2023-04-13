@@ -70,9 +70,6 @@ public:
         });
     }
     void loopHook() override {};
-	
-	boolean getConnected() { return connected; }
-    
 private:
     EmbAJAXOutputDriverWebServerClass *_server;
     AsyncWebServerRequest *_request;
