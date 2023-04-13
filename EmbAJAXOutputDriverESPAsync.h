@@ -69,7 +69,7 @@ public:
              _request = 0;
         });
     }
-    void loopHook() override {};    
+    void loopHook() override {};
 private:
     EmbAJAXOutputDriverWebServerClass *_server;
     AsyncWebServerRequest *_request;
