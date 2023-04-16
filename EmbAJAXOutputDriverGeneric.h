@@ -54,6 +54,10 @@ public:
     void printContent(const char *content) override {
         if (content[0] != '\0') _server->sendContent(content);  // NOTE: There seems to be a bug in the ESP8266 server when sending empty string.
     }
+    void printContent(const __FlashStringHelper *content) override {
+		uint8_t ch = pgm_read_byte(content);
+        if (ch != '\0') _server->sendContent(content);  // NOTE: There seems to be a bug in the ESP8266 server when sending empty string.
+    }
     const char* getArg(const char* name, char* buf, int buflen) override {
         _server->arg(name).toCharArray (buf, buflen);
         return buf;
