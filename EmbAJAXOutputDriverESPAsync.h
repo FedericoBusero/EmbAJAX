@@ -52,6 +52,9 @@ public:
     void printContent(const char *content) override {
         _response->print(content);
     }
+    void printContent(const __FlashStringHelper *content) override {
+        _response->print(content);
+    }
     const char* getArg(const char* name, char* buf, int buflen) override {
         _request->arg(name).toCharArray (buf, buflen);
         return buf;
